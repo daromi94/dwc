@@ -3,15 +3,11 @@ package com.daromi.dwc.core
 import org.apache.pekko.actor.typed.Behavior
 import org.apache.pekko.actor.typed.scaladsl.{AbstractBehavior, ActorContext, Behaviors}
 
-sealed trait ApplicationMessage
-
 final class Application(
-    context: ActorContext[ApplicationMessage]
-) extends AbstractBehavior[ApplicationMessage](context):
+    context: ActorContext[Application.Message]
+) extends AbstractBehavior[Application.Message](context):
 
-  override def onMessage(
-      msg: ApplicationMessage
-  ): Behavior[ApplicationMessage] =
+  override def onMessage(msg: Application.Message): Behavior[Application.Message] =
     msg match
       case Application.Start =>
         val counter          = context.spawn(Counter(), "counter")
@@ -23,6 +19,7 @@ final class Application(
 
 object Application:
 
-  case object Start extends ApplicationMessage
+  def apply(): Behavior[Message] = Behaviors.setup(context => new Application(context))
 
-  def apply(): Behavior[ApplicationMessage] = Behaviors.setup(context => new Application(context))
+  sealed trait Message
+  case object Start extends Message

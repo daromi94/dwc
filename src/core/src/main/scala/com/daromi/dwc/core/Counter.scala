@@ -3,15 +3,13 @@ package com.daromi.dwc.core
 import org.apache.pekko.actor.typed.Behavior
 import org.apache.pekko.actor.typed.scaladsl.{AbstractBehavior, ActorContext, Behaviors}
 
-sealed trait CounterMessage
-
 final class Counter(
-    context: ActorContext[CounterMessage]
-) extends AbstractBehavior[CounterMessage](context):
+    context: ActorContext[Counter.Message]
+) extends AbstractBehavior[Counter.Message](context):
 
   private var count: Int = 0
 
-  override def onMessage(msg: CounterMessage): Behavior[CounterMessage] =
+  override def onMessage(msg: Counter.Message): Behavior[Counter.Message] =
     msg match
       case Counter.Increment =>
         count += 1
@@ -20,6 +18,7 @@ final class Counter(
 
 object Counter:
 
-  case object Increment extends CounterMessage
+  def apply(): Behavior[Message] = Behaviors.setup(context => new Counter(context))
 
-  def apply(): Behavior[CounterMessage] = Behaviors.setup(context => new Counter(context))
+  sealed trait Message
+  case object Increment extends Message

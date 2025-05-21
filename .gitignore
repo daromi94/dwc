@@ -1,0 +1,10 @@
+# sbt
+target
+.bsp
+
+# editors
+.idea
+.vscode
+
+# os
+.DS_Store

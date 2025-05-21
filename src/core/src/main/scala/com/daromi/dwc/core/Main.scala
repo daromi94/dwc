@@ -1,4 +1,7 @@
 package com.daromi.dwc.core
 
+import org.apache.pekko.actor.typed.ActorSystem
+
 @main def main(): Unit =
-  println("Hello, World!")
+  val system = ActorSystem.create(Guardian(), "guardian")
+  system ! Guardian.Start

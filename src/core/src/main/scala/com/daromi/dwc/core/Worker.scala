@@ -1,10 +1,6 @@
 package com.daromi.dwc.core
 
-import org.apache.pekko.actor.typed.scaladsl.{
-  AbstractBehavior,
-  ActorContext,
-  Behaviors
-}
+import org.apache.pekko.actor.typed.scaladsl.{AbstractBehavior, ActorContext, Behaviors}
 import org.apache.pekko.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
 
 sealed trait WorkerSupervisorMessage
@@ -18,24 +14,24 @@ final class WorkerSupervisor(
   ): Behavior[WorkerSupervisorMessage] =
     msg match
       case WorkerSupervisor.Start(counter) =>
-        val workers = (1 to 1000) map { i =>
-          context.spawn(
-            Behaviors.supervise(Worker()).onFailure(SupervisorStrategy.restart),
-            s"worker-$i"
-          )
-        }
+        val workers = spawnWorkers()
+
         workers.foreach { _ ! Worker.Start(counter) }
         workers.foreach { _ ! Worker.Stop }
+
         this
+
+  private def spawnWorkers(): ActorRef[WorkerMessage] =
+    (1 to 1000).map { i =>
+      val behavior = Behaviors.supervise(Worker()).onFailure(SupervisorStrategy.restart)
+      context.spawn(behavior, s"worker-$i")
+    }
 
 object WorkerSupervisor:
 
-  case class Start(
-      counter: ActorRef[CounterMessage]
-  ) extends WorkerSupervisorMessage
+  case class Start(counter: ActorRef[CounterMessage]) extends WorkerSupervisorMessage
 
-  def apply(): Behavior[WorkerSupervisorMessage] =
-    Behaviors.setup(context => new WorkerSupervisor(context))
+  def apply(): Behavior[WorkerSupervisorMessage] = Behaviors.setup(context => new WorkerSupervisor(context))
 
 sealed trait WorkerMessage
 
@@ -56,5 +52,4 @@ object Worker:
   case class Start(counter: ActorRef[CounterMessage]) extends WorkerMessage
   case object Stop                                    extends WorkerMessage
 
-  def apply(): Behavior[WorkerMessage] =
-    Behaviors.setup(context => new Worker(context))
+  def apply(): Behavior[WorkerMessage] = Behaviors.setup(context => new Worker(context))

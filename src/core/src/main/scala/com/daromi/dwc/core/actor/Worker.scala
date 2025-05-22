@@ -23,6 +23,6 @@ object Worker:
       context: ActorContext[Command],
       counter: ActorRef[Counter.Command]
   ): Behavior[Command] =
-    for i <- 1 to 1000 do counter ! Counter.Increment
+    for i <- 1 to 1_000 do counter ! Counter.Increment
 
     Behaviors.same

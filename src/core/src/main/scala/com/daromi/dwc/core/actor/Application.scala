@@ -19,8 +19,8 @@ object Application:
     }
 
   private def handleStart(context: ActorContext[Command]): Behavior[Command] =
-    val counter          = context.spawn(Counter(), "counter")
-    val workerSupervisor = context.spawn(WorkerSupervisor(), "worker-supervisor")
+    val counter          = context.spawn(Counter(), "Counter")
+    val workerSupervisor = context.spawn(WorkerSupervisor(), "WorkerSupervisor")
 
     workerSupervisor ! WorkerSupervisor.Start(counter)
 

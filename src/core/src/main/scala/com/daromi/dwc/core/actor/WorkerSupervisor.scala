@@ -32,7 +32,7 @@ object WorkerSupervisor:
 
   private def spawnWorkers(context: ActorContext[Command]): Seq[ActorRef[Worker.Command]] =
     (1 to 1_000).map { i =>
-      val name     = s"worker-$i"
+      val name     = s"Worker$i"
       val behavior = Behaviors.supervise(Worker()).onFailure(SupervisorStrategy.restart)
 
       context.spawn(behavior, name)

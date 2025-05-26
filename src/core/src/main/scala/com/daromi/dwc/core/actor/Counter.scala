@@ -26,6 +26,6 @@ object Counter:
   ): Behavior[Command] =
     val next = State(state.count + 1)
 
-    println(s"${context.self}: count=${next.count}")
+    context.log.info(s"${context.self}: count=${next.count}")
 
     react(next)

@@ -1,28 +1,19 @@
 package com.daromi.dwc.core.actor
 
-import org.apache.pekko.actor.typed.scaladsl.{ActorContext, Behaviors}
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.{ActorRef, Behavior}
 
 object Worker:
 
   sealed trait Command
-  final case class Start(counter: ActorRef[Counter.Command]) extends Command
-  case object Stop                                           extends Command
+  final case class Run(counter: ActorRef[Counter.Command]) extends Command
 
-  def apply(): Behavior[Command] = react()
+  def apply(): Behavior[Command] = active()
 
-  private def react(): Behavior[Command] =
-    Behaviors.receive { (context, message) =>
-      message match {
-        case Start(counter) => handleStart(context, counter)
-        case Stop           => Behaviors.stopped
-      }
-    }
+  private def active(): Behavior[Command] =
+    Behaviors.receiveMessage { case Run(counter) => handleRun(counter) }
 
-  private def handleStart(
-      context: ActorContext[Command],
-      counter: ActorRef[Counter.Command]
-  ): Behavior[Command] =
+  private def handleRun(counter: ActorRef[Counter.Command]): Behavior[Command] =
     for _ <- 1 to 1_000 do counter ! Counter.Increment
 
-    Behaviors.same
+    Behaviors.stopped

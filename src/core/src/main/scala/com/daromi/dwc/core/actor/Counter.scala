@@ -7,25 +7,23 @@ object Counter:
 
   sealed trait Command
   case object Increment extends Command
-  case object Stop      extends Command
 
   private final case class State(count: Int)
 
-  def apply(): Behavior[Command] = react(State(0))
+  def apply(): Behavior[Command] =
+    val initial = State(0)
 
-  private def react(state: State): Behavior[Command] =
-    Behaviors.receive { (context, message) =>
+    active(initial)
+
+  private def active(state: State): Behavior[Command] =
+    Behaviors.receive { (ctx, message) =>
       message match
-        case Increment => handleIncrement(context, state)
-        case Stop      => Behaviors.stopped
+        case Increment => handleIncrement(ctx)(state)
     }
 
-  private def handleIncrement(
-      context: ActorContext[Command],
-      state: State
-  ): Behavior[Command] =
+  private def handleIncrement(ctx: ActorContext[Command])(state: State): Behavior[Command] =
     val next = State(state.count + 1)
 
-    context.log.info(s"${context.self}: count=${next.count}")
+    ctx.log.info(s"${ctx.self}: count=${next.count}")
 
-    react(next)
+    active(next)
